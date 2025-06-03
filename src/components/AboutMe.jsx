@@ -4,12 +4,12 @@ export default function AboutMe() {
   return (
     <section className="relative py-16 bg-[#10101A] flex flex-col items-center text-center" id="about">
       <motion.img
-        src="https://avatars.githubusercontent.com/u/105404607?s=400&u=ca8cbb8e5019333c5c87952a403e155edcdceb09&v=4"
+        src="/images/my.JPG"
         alt="Kushal Sri Rangam"
-        className="w-32 h-32 rounded-full border-4 border-[#00ffe7] shadow-xl mb-4"
-        initial={{ scale: 0, y: 100 }}
-        whileInView={{ scale: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
+        className="w-40 h-40 object-cover rounded-full border-4 border-[#00ffe7] shadow-2xl mb-4"
+        initial={{ opacity: 0, scale: 0.8, y: 80 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       />
       <motion.h2
         className="text-4xl font-bold mb-2 text-white"
@@ -25,14 +25,17 @@ export default function AboutMe() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        I’m Kushal Sri Rangam, passionate about AI, ML, and building smart, user-focused solutions. I recently completed my Master’s in Computer Science at University of the Pacific and have built award-winning projects like Smart Hat (for visually impaired navigation), Resume Analysis AI, and Laureate Lens. Always exploring tech that makes a difference!
+        I’m Kushal Sri Rangam, passionate about AI, ML, and building smart, user-focused solutions.
+        I recently completed my Master’s in Computer Science at University of the Pacific and have
+        built award-winning projects like Smart Hat (for visually impaired navigation), Resume Analysis AI,
+        and Laureate Lens. Always exploring tech that makes a difference!
       </motion.p>
       <div className="flex flex-wrap gap-4 mt-6 justify-center">
         <motion.div
           className="bg-[#181829] text-[#00ffe7] rounded-xl px-6 py-2 font-semibold text-lg shadow-lg"
           whileHover={{ scale: 1.08, backgroundColor: "#00ffe7", color: "#10101A" }}
         >
-          🏆 IEEE AIIoT 2025 
+          🏆 IEEE AIIoT 2025
         </motion.div>
         <motion.div
           className="bg-[#181829] text-[#00ffe7] rounded-xl px-6 py-2 font-semibold text-lg shadow-lg"
