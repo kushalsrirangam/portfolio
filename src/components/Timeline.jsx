@@ -2,31 +2,42 @@ import { motion } from "framer-motion";
 
 const milestones = [
   {
-    date: "May 2025",
-    title: "M.S. in Computer Science",
-    org: "University of the Pacific",
-    desc: "Specialized in AI/ML, Data Analytics, Cloud Security.",
+    date: "2024",
+    title: "Esports Storytelling Platform",
+    org: "Data Visualization Developer",
+    desc: "Designed a Squarespace-integrated Power BI blog with Twitch, YouTube, and Twitter APIs to showcase global esports insights.",
   },
   {
     date: "2025",
-    title: "Smart Hat Project",
+    title: "Smart Hat (AI Navigation)",
     org: "Research Assistant",
-    desc: "Built an AI-powered wearable navigation system for visually impaired, published at IEEE AIIoT 2025.",
+    desc: "Built an AI-powered wearable navigation system using Raspberry Pi, TFLite, and Firebase. Published at IEEE AIIoT 2025.",
   },
   {
     date: "2025",
-    title: "Laureate Lens & Resume Analyzer",
+    title: "Laureate Lens (Nobel Storytelling Portal)",
     org: "Full Stack Developer",
-    desc: "Developed advanced data storytelling and resume matching tools with React, Python, and AI.",
+    desc: "Created a Power BI + React platform to analyze Nobel trends with an integrated AI chatbot using LangChain + FAISS + OpenAI.",
+  },
+  {
+    date: "2025",
+    title: "Resume Analyzer (AI-Powered Resume Feedback Tool)",
+    org: "AI/NLP Engineer",
+    desc: "Built a BERT-based resume evaluation tool with ATS scoring, job-role prediction, and GPT-enhanced suggestions using Streamlit.",
   },
   {
     date: "2025",
     title: "Global AI Hackathon Winner",
     org: "MIT RAISE",
-    desc: "Awarded for VisionCap — an IoT + AI solution for real-world impact.",
+    desc: "Awarded for VisionCap — an IoT + AI solution focused on assistive vision and real-world impact.",
   },
+  {
+    date: "May 2025",
+    title: "M.S. in Computer Science",
+    org: "University of the Pacific",
+    desc: "Specialized in AI/ML, Data Analytics, and Cloud Security.",
+  }
 ];
-
 
 export default function Timeline() {
   return (

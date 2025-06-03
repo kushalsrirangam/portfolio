@@ -9,7 +9,7 @@ const achievements = [
   },
   {
     title: "Global AI Hackathon Winner (MIT RAISE)",
-    date: "2025",
+    date: "May 2025",
     icon: "🏆",
     description: "Won all-ages Global AI Hackathon for VisionCap IoT project, awarded by MIT RAISE & App Inventor Foundation.",
     type: "Hackathon",
@@ -17,7 +17,7 @@ const achievements = [
   },
   {
     title: "AWS Academy Cloud Foundations",
-    date: "April 2025",
+    date: "April 2024",
     icon: "☁️",
     description: "Completed AWS Academy Cloud Foundations certification.",
     type: "Certification",

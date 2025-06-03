@@ -32,7 +32,7 @@ export default function AboutMe() {
           className="bg-[#181829] text-[#00ffe7] rounded-xl px-6 py-2 font-semibold text-lg shadow-lg"
           whileHover={{ scale: 1.08, backgroundColor: "#00ffe7", color: "#10101A" }}
         >
-          🏆 IEEE AIIoT 2025 Presenter
+          🏆 IEEE AIIoT 2025 
         </motion.div>
         <motion.div
           className="bg-[#181829] text-[#00ffe7] rounded-xl px-6 py-2 font-semibold text-lg shadow-lg"
