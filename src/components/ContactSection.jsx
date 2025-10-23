@@ -45,7 +45,7 @@ export default function ContactSection() {
         </div>
 
         <a
-          href="/videos/Resume.pdf"
+          href="/videos/RESUME (1).pdf"
           download
           className="inline-block mt-2 px-6 py-3 bg-cyan-400 text-[#181829] font-semibold rounded-lg shadow-lg hover:bg-cyan-300 transition-all"
         >
