@@ -1,43 +1,74 @@
 import { Component, Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Stars } from "@react-three/drei";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
-import Stations, { STATIONS } from "./stations";
+import Room from "./room/Room";
+import Setup from "./room/Setup";
+import { LevelWall, TrophyShelf, Arcade } from "./room/Props";
 import { scrollStore, startTracking } from "./scrollStore";
 
-const BG = "#07070f";
-const LAST = STATIONS.length - 1;
+const BG = "#05050c";
 
-// Flies the camera along a curve through every station, following scroll.
+// One camera shot per page section, in page order.
+// `frame` slides the shot sideways on wide screens so the subject sits beside
+// the section's text panel: +1 = subject on the right, -1 = on the left.
+const SHOTS = [
+  { pos: [3.3, 2.25, 2.1], target: [-0.1, 1.15, -2.7], frame: 0.5 }, // hero: the whole setup
+  { pos: [-0.55, 1.7, -1.5], target: [-1.15, 1.25, -3.05], frame: -0.9 }, // about: profile screen
+  { pos: [-1.3, 2.45, -1.0], target: [-6.47, 2.4, -1.0], frame: -0.85 }, // timeline: level wall
+  { pos: [0.8, 1.7, -1.3], target: [0, 1.3, -3.25], frame: 0.9 }, // projects: main monitor
+  { pos: [4.2, 1.7, -1.65], target: [5.17, 1.45, -3.06], frame: 0.9 }, // skills: arcade
+  { pos: [3.4, 2.25, 0.5], target: [6.25, 2.15, 0.5], frame: 0.9 }, // achievements: trophies
+  { pos: [-1.6, 3.1, 6.4], target: [1.4, 2.2, -3.6], frame: 0.95 }, // contact: pull back
+];
+const LAST = SHOTS.length - 1;
+
+const smooth = (x) => x * x * (3 - 2 * x);
+
+// Moves the camera between shots as the page scrolls.
 function CameraRig() {
   const current = useRef(0);
-  const look = useRef(new THREE.Vector3());
-  const { camPath, lookPath } = useMemo(() => {
-    const cam = STATIONS.map((s) => new THREE.Vector3(0, s.y + 0.6, s.z + 13));
-    const target = STATIONS.map((s) => new THREE.Vector3(0, s.y, s.z));
-    return {
-      camPath: new THREE.CatmullRomCurve3(cam),
-      lookPath: new THREE.CatmullRomCurve3(target),
-    };
-  }, []);
+  const target = useRef(new THREE.Vector3());
+  const tmp = useRef(new THREE.Vector3());
+  const path = useMemo(
+    () => new THREE.CatmullRomCurve3(SHOTS.map((s) => new THREE.Vector3(...s.pos)), false, "centripetal"),
+    []
+  );
+  const targets = useMemo(() => SHOTS.map((s) => new THREE.Vector3(...s.target)), []);
 
   useFrame((state, dt) => {
-    // Ease toward the scroll position so the flight feels smooth.
-    const k = 1 - Math.exp(-Math.min(dt, 0.1) * 4);
+    const cam = state.camera;
+    const k = 1 - Math.exp(-Math.min(dt, 0.1) * 3.5);
     current.current += (scrollStore.station - current.current) * k;
-    const t = current.current / LAST;
+    const s = THREE.MathUtils.clamp(current.current, 0, LAST);
+    const i = Math.min(Math.floor(s), LAST - 1);
+    const f = smooth(s - i);
 
-    // Swing out sideways between stations, so moving feels like flying.
-    const between = current.current % 1;
-    const swing = Math.sin(between * Math.PI) * (Math.floor(current.current) % 2 ? -2.5 : 2.5);
+    // Position follows a smooth curve; aim blends between subjects.
+    path.getPoint(s / LAST, cam.position);
+    tmp.current.lerpVectors(targets[i], targets[i + 1], f);
 
-    const p = camPath.getPoint(t);
+    // Portrait screens see less of the room, so back the camera away from
+    // its subject to keep the same things in shot.
+    const { width, height } = state.size;
+    const aspect = width / height;
+    if (aspect < 1) {
+      const pull = 1 + (1 - aspect) * 0.9;
+      cam.position.sub(tmp.current).multiplyScalar(pull).add(tmp.current);
+    }
+
     const { x: px, y: py } = scrollStore.pointer;
-    state.camera.position.set(p.x + swing + px * 0.8, p.y + py * 0.5, p.z);
+    cam.position.x += px * 0.12;
+    cam.position.y += py * 0.08;
+    target.current.lerp(tmp.current, 0.25);
+    cam.lookAt(target.current);
 
-    look.current.lerp(lookPath.getPoint(Math.min(t + 0.02, 1)), 0.2);
-    state.camera.lookAt(look.current);
-    state.camera.rotation.z += swing * -0.02;
+    // Slide the framing so the subject sits beside the text panel.
+    const frame = THREE.MathUtils.lerp(SHOTS[i].frame, SHOTS[i + 1].frame, f);
+    const wide = aspect > 1.15;
+    const shift = wide ? -frame * width * 0.22 : 0;
+    cam.setViewOffset(width, height, shift, 0, width, height);
+    cam.updateProjectionMatrix();
   });
   return null;
 }
@@ -63,26 +94,26 @@ export default function Scene3D() {
       <SceneBoundary>
         <Canvas
           dpr={[1, mobile ? 1.25 : 1.75]}
-          camera={{ fov: 50, near: 0.1, far: 320, position: [0, 0.6, 13] }}
+          camera={{ fov: 50, near: 0.05, far: 60, position: SHOTS[0].pos }}
           gl={{ antialias: !mobile, powerPreference: "high-performance" }}
         >
           <color attach="background" args={[BG]} />
-          <fog attach="fog" args={[BG, 18, 60]} />
-          <ambientLight intensity={0.4} />
-          <directionalLight position={[5, 8, 5]} intensity={1.4} />
-          <pointLight position={[-6, -2, -20]} color="#00ffe7" intensity={40} distance={40} />
-          <pointLight position={[6, 2, -110]} color="#a855f7" intensity={40} distance={40} />
-
-          {/* A star field stretched along the flight path, so the camera
-              stays inside it from the hero to the contact portal. */}
-          <group position={[0, 0, (STATIONS[LAST].z + 13) / 2]} scale={[1, 1, 2]}>
-            <Stars radius={60} depth={60} count={mobile ? 1500 : 4000} factor={4} fade speed={0.6} />
-          </group>
-
+          <fog attach="fog" args={[BG, 9, 24]} />
           <Suspense fallback={null}>
-            <Stations />
+            <Room />
+            <Setup />
+            <LevelWall />
+            <TrophyShelf />
+            <Arcade />
           </Suspense>
           <CameraRig />
+          {/* Neon glow. Skipped on phones to keep them smooth. */}
+          {!mobile && (
+            <EffectComposer multisampling={0}>
+              <Bloom mipmapBlur intensity={0.85} luminanceThreshold={0.6} luminanceSmoothing={0.25} />
+              <Vignette offset={0.3} darkness={0.6} />
+            </EffectComposer>
+          )}
         </Canvas>
       </SceneBoundary>
     </div>

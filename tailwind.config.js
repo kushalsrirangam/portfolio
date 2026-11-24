@@ -9,6 +9,9 @@ export default {
       colors: {
         dark: "#10101A",
       },
+      fontFamily: {
+        display: ["Orbitron", "sans-serif"],
+      },
     },
   },
 };

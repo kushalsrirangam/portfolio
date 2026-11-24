@@ -11,7 +11,7 @@ import ContactSection from "./components/ContactSection";
 import Footer from "./components/Footer";
 import ProjectDetails from "./components/pages/ProjectDetails";
 
-// three.js is loaded separately so the text appears before the 3D scene.
+// The 3D gaming room loads separately so the text appears first.
 const Scene3D = lazy(() => import("./three/Scene3D"));
 
 function Home() {
@@ -23,13 +23,14 @@ function Home() {
       <Navbar />
       {/* Sections scroll over the fixed 3D scene; the camera follows them. */}
       <main className="relative z-10 overflow-x-clip">
-        <Hero />
-        <AboutMe />
-        <Timeline />
-        <ProjectsSection />
-        <SkillsCloud />
-        <AchievementsSection />
-        <ContactSection />
+        {/* Each panel sits opposite the part of the room the camera shows. */}
+        <div className="side-left"><Hero /></div>
+        <div className="side-right"><AboutMe /></div>
+        <div className="side-right"><Timeline /></div>
+        <div className="side-left"><ProjectsSection /></div>
+        <div className="side-left"><SkillsCloud /></div>
+        <div className="side-left"><AchievementsSection /></div>
+        <div className="side-left"><ContactSection /></div>
         <Footer />
       </main>
     </>
