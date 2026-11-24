@@ -1,4 +1,4 @@
-import { Component, Suspense, useEffect, useMemo, useRef } from "react";
+import { Component, Suspense, lazy, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { EffectComposer, Bloom, N8AO, Vignette } from "@react-three/postprocessing";
 import { useGLTF } from "@react-three/drei";
@@ -6,10 +6,14 @@ import * as THREE from "three";
 import Office from "./office/Office";
 import Workstation from "./office/Workstation";
 import { JourneyWall, MeetingArea, AwardsShelf } from "./office/Areas";
-import { MODELS } from "./office/shared";
+import BakedOffice from "./office/BakedOffice";
+import { MODELS, BAKE_EXPORT } from "./office/shared";
 import { scrollStore, startTracking } from "./scrollStore";
 
 const BG = "#0b0d12";
+
+// ?bake-export: hand the live-lit office to tools/bake/export-office.mjs.
+const BakeExport = lazy(() => import("./office/BakeExport"));
 
 // Start fetching the furniture as soon as this file loads.
 MODELS.forEach((m) => useGLTF.preload(`/models/${m}.glb`));
@@ -92,6 +96,7 @@ class SceneBoundary extends Component {
 
 export default function Scene3D() {
   useEffect(() => startTracking(), []);
+  const root = useRef();
   const mobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   return (
@@ -103,11 +108,14 @@ export default function Scene3D() {
           gl={{ antialias: !mobile, powerPreference: "high-performance", toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
         >
           <Suspense fallback={null}>
-            <Office />
-            <Workstation />
-            <JourneyWall />
-            <MeetingArea />
-            <AwardsShelf />
+            <group ref={root} name="office-root">
+              <Office />
+              <Workstation />
+              <JourneyWall />
+              <MeetingArea />
+              <AwardsShelf />
+            </group>
+            {BAKE_EXPORT ? <BakeExport root={root} /> : <BakedOffice root={root} />}
           </Suspense>
           <CameraRig />
           {/* Ambient occlusion (soft contact darkening) and a gentle glow on
