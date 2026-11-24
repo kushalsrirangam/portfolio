@@ -4,6 +4,11 @@ import * as THREE from "three";
 
 export const FONT = "/fonts/space-grotesk-700.woff";
 
+// ?bake-export renders the office with live lighting only, for tools/bake.
+// Everywhere else the Blender-baked lighting is used.
+export const BAKE_EXPORT =
+  typeof window !== "undefined" && window.location.search.includes("bake-export");
+
 // Room layout in metres. The back wall is glass onto the city.
 export const ROOM = {
   left: -6,
@@ -50,6 +55,11 @@ export function useModel(name) {
   const { scene } = useGLTF(`/models/${name}.glb`);
   return useMemo(() => {
     const copy = scene.clone(true);
+    // Downloaded models keep their own detailed materials and live lighting,
+    // but still cast shadows into the bake. Plants are left out entirely:
+    // their thin, alpha-cut leaves bake poorly.
+    if (name.startsWith("potted_plant")) copy.userData.noBake = true;
+    else copy.userData.bakeRole = "occluder";
     copy.traverse((o) => {
       if (o.isMesh) {
         o.castShadow = true;
@@ -58,6 +68,24 @@ export function useModel(name) {
     });
     return copy;
   }, [scene]);
+}
+
+// Each mesh's part in the lighting bake (see tools/bake):
+// - "receiver": baked light is painted onto it (room, desk, shelves, frames...)
+// - "occluder": casts shadows in the bake but keeps live lighting
+//   (the downloaded furniture models)
+// - null: left out (screens and light strips, glass, 3D text, keyboard keys,
+//   plants)
+export function bakeRole(o) {
+  if (!o.isMesh || o.isInstancedMesh) return null;
+  if (typeof o.sync === "function") return null; // 3D text
+  const m = Array.isArray(o.material) ? o.material[0] : o.material;
+  if (!m || m.isMeshBasicMaterial || m.transparent) return null;
+  for (let p = o; p; p = p.parent) {
+    if (p.userData?.noBake) return null;
+    if (p.userData?.bakeRole === "occluder") return "occluder";
+  }
+  return "receiver";
 }
 
 export function Model({ name, ...props }) {

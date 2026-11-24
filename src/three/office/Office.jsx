@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Environment, RoundedBox, Text, useTexture, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
-import { FONT, ROOM, MAT, Model, lightMat } from "./shared";
+import { FONT, ROOM, MAT, Model, lightMat, BAKE_EXPORT } from "./shared";
 
 const { left: L, right: R, back: B, front: F, height: H } = ROOM;
 const WIDTH = R - L;
@@ -168,8 +168,11 @@ export default function Office() {
       />
 
       <Floor />
-      <ContactShadows position={[0, 0.005, (B + F) / 2]} scale={[WIDTH, DEPTH]} resolution={1024}
-        far={2.5} blur={2.4} opacity={0.55} frames={1} />
+      {/* Live mode only: the baked lighting already has real shadows. */}
+      {BAKE_EXPORT && (
+        <ContactShadows position={[0, 0.005, (B + F) / 2]} scale={[WIDTH, DEPTH]} resolution={1024}
+          far={2.5} blur={2.4} opacity={0.55} frames={1} />
+      )}
 
       {/* Ceiling and side walls */}
       <mesh position={[0, H, (B + F) / 2]} rotation={[Math.PI / 2, 0, 0]} material={MAT.ceiling}>
