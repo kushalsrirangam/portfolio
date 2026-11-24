@@ -1,60 +1,93 @@
 import { useMemo } from "react";
-import { RoundedBox, Text } from "@react-three/drei";
+import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
-import milestones from "../../data/timeline";
-import skills from "../../data/skills";
 import achievements from "../../data/achievements";
-import { FONT, ACCENT, ROOM, MAT, Model, lightMat } from "./shared";
+import { ROOM, MAT, Model, lightMat, canvasTexture } from "./shared";
 
-/* ---------- Timeline: framed prints on the left wall ---------- */
+/* ---------- Timeline: a gallery wall of framed art prints ---------- */
 
-const JOURNEY = { x: ROOM.left + 0.02, y: 1.6, z: -1.0 };
+const GALLERY = { x: ROOM.left + 0.02, y: 1.6, z: -1.0 };
 
-function Print({ item, index, position }) {
+// Six quiet abstract prints in a gallery palette, painted on a canvas.
+const PALETTES = [
+  ["#efe8dc", "#c2703d", "#2f3e46"],
+  ["#e9edf0", "#3d5a80", "#98c1d9"],
+  ["#f2efe9", "#283618", "#bc6c25"],
+  ["#ebe6df", "#6d597a", "#e56b6f"],
+  ["#eef0ea", "#1d3557", "#a8dadc"],
+  ["#f1ece4", "#8a5a44", "#d4a373"],
+];
+
+function paintPrint(i) {
+  const [bg, a, b] = PALETTES[i % PALETTES.length];
+  return canvasTexture(780, 560, (g, W, H) => {
+    g.fillStyle = bg;
+    g.fillRect(0, 0, W, H);
+    g.globalAlpha = 0.92;
+    switch (i % 6) {
+      case 0: // sun over horizon
+        g.fillStyle = a; g.beginPath(); g.arc(W * 0.55, H * 0.45, 120, 0, Math.PI * 2); g.fill();
+        g.fillStyle = b; g.fillRect(0, H * 0.62, W, H * 0.38);
+        break;
+      case 1: // stacked arches
+        for (let k = 0; k < 4; k++) {
+          g.strokeStyle = k % 2 ? a : b; g.lineWidth = 26;
+          g.beginPath(); g.arc(W / 2, H, 90 + k * 55, Math.PI, 0); g.stroke();
+        }
+        break;
+      case 2: // offset blocks
+        g.fillStyle = a; g.fillRect(W * 0.18, H * 0.2, W * 0.34, H * 0.6);
+        g.fillStyle = b; g.fillRect(W * 0.44, H * 0.34, W * 0.36, H * 0.42);
+        break;
+      case 3: // two circles
+        g.fillStyle = a; g.beginPath(); g.arc(W * 0.4, H * 0.5, 150, 0, Math.PI * 2); g.fill();
+        g.globalAlpha = 0.75; g.fillStyle = b; g.beginPath(); g.arc(W * 0.6, H * 0.5, 150, 0, Math.PI * 2); g.fill();
+        break;
+      case 4: // diagonal bands
+        for (let k = -4; k < 8; k++) {
+          g.fillStyle = k % 2 ? a : b; g.beginPath();
+          g.moveTo(k * 110, H); g.lineTo(k * 110 + 55, H); g.lineTo(k * 110 + 55 + H * 0.6, 0); g.lineTo(k * 110 + H * 0.6, 0); g.fill();
+        }
+        break;
+      default: // contour lines
+        g.strokeStyle = a; g.lineWidth = 5;
+        for (let k = 0; k < 14; k++) {
+          g.beginPath();
+          for (let x = 0; x <= W; x += 10) {
+            const y = H * 0.2 + k * 26 + Math.sin(x / 70 + k * 0.5) * 22;
+            x ? g.lineTo(x, y) : g.moveTo(x, y);
+          }
+          g.stroke();
+        }
+        g.fillStyle = b; g.beginPath(); g.arc(W * 0.72, H * 0.3, 50, 0, Math.PI * 2); g.fill();
+    }
+  });
+}
+
+function Print({ index, position }) {
+  const art = useMemo(() => paintPrint(index), [index]);
   return (
     <group position={position}>
-      {/* Thin black frame with a white mat and print */}
+      {/* Thin black frame, white mat, art print */}
       <RoundedBox args={[0.82, 0.6, 0.03]} radius={0.004} position={[0, 0, 0.015]} material={MAT.blackMetal} castShadow />
       <mesh position={[0, 0, 0.031]}>
         <planeGeometry args={[0.78, 0.56]} />
         <meshStandardMaterial color="#fbfaf7" roughness={0.9} />
       </mesh>
-      <Text font={FONT} fontSize={0.07} color="#0f172a" anchorX="left" anchorY="middle" position={[-0.33, 0.18, 0.033]}>
-        {item.date}
-      </Text>
-      <Text font={FONT} fontSize={0.025} color="#94a3b8" anchorX="right" anchorY="middle" position={[0.33, 0.19, 0.033]}>
-        {String(index + 1).padStart(2, "0")}
-      </Text>
-      <mesh position={[-0.27, 0.115, 0.033]}>
-        <planeGeometry args={[0.12, 0.006]} />
-        <meshBasicMaterial color="#0e7490" />
+      <mesh position={[0, 0, 0.032]}>
+        <planeGeometry args={[0.6, 0.42]} />
+        <meshStandardMaterial map={art} roughness={0.85} />
       </mesh>
-      <Text font={FONT} fontSize={0.036} color="#111827" anchorX="left" anchorY="top" position={[-0.33, 0.08, 0.033]}
-        maxWidth={0.66} lineHeight={1.2}>
-        {item.title.split(" (")[0]}
-      </Text>
-      <Text font={FONT} fontSize={0.024} color="#0e7490" anchorX="left" anchorY="bottom" position={[-0.33, -0.2, 0.033]}
-        maxWidth={0.66}>
-        {item.org}
-      </Text>
     </group>
   );
 }
 
 export function JourneyWall() {
-  const { x, y, z } = JOURNEY;
+  const { x, y, z } = GALLERY;
   return (
     <group position={[x, y, z]} rotation={[0, Math.PI / 2, 0]}>
-      <Text font={FONT} fontSize={0.13} letterSpacing={0.2} color="#1f2937" position={[0, 0.98, 0]} anchorX="center">
-        MY JOURNEY
-      </Text>
-      {milestones.map((m, i) => (
-        <Print
-          key={m.title}
-          item={m}
-          index={i}
-          position={[((i % 3) - 1) * 0.98, i < 3 ? 0.36 : -0.36, 0]}
-        />
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <Print key={i} index={i} position={[((i % 3) - 1) * 0.98, i < 3 ? 0.36 : -0.36, 0]} />
       ))}
       {/* Picture lights above the prints */}
       {[-0.98, 0, 0.98].map((px) => (
@@ -73,49 +106,34 @@ export function JourneyWall() {
 
 const MEETING = { x: ROOM.right, z: -2.2 };
 
-function TechStackSlide({ w, h }) {
-  const cols = 5;
+// TV: a dark brand splash with a monogram (scenery, no portfolio text).
+function LogoSplash({ w, h }) {
+  const tex = useMemo(
+    () =>
+      canvasTexture(1600, 900, (g, W, H) => {
+        const bg = g.createRadialGradient(W / 2, H / 2, 50, W / 2, H / 2, W * 0.7);
+        bg.addColorStop(0, "#13233b");
+        bg.addColorStop(1, "#05080f");
+        g.fillStyle = bg;
+        g.fillRect(0, 0, W, H);
+        g.strokeStyle = "rgba(34,211,238,0.9)";
+        g.lineWidth = 6;
+        g.beginPath();
+        g.arc(W / 2, H / 2, 150, 0, Math.PI * 2);
+        g.stroke();
+        g.fillStyle = "#e2f6fb";
+        g.font = "bold 120px \"Space Grotesk\", Arial, sans-serif";
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.fillText("KSR", W / 2, H / 2 + 6);
+      }),
+    []
+  );
   return (
-    <group>
-      <mesh>
-        <planeGeometry args={[w, h]} />
-        <meshBasicMaterial color="#0b1220" toneMapped={false} />
-      </mesh>
-      <Text font={FONT} fontSize={0.06} color="#f8fafc" anchorX="left" anchorY="middle"
-        position={[-w / 2 + 0.08, h / 2 - 0.09, 0.001]} material-toneMapped={false}>
-        Tech Stack
-      </Text>
-      <Text font={FONT} fontSize={0.024} color="#94a3b8" anchorX="right" anchorY="middle"
-        position={[w / 2 - 0.08, h / 2 - 0.09, 0.001]} material-toneMapped={false}>
-        Kushal Sri Rangam · Q4 review
-      </Text>
-      {skills.map((s, i) => {
-        const c = i % cols;
-        const r = Math.floor(i / cols);
-        const x = -w / 2 + 0.08 + c * ((w - 0.16) / cols) + 0.12;
-        const y = h / 2 - 0.22 - r * 0.13;
-        return (
-          <group key={s.name} position={[x, y, 0.001]}>
-            <mesh>
-              <planeGeometry args={[0.24, 0.085]} />
-              <meshBasicMaterial color="#172033" toneMapped={false} />
-            </mesh>
-            <mesh position={[-0.115, 0, 0.0005]}>
-              <planeGeometry args={[0.006, 0.085]} />
-              <meshBasicMaterial color={ACCENT} toneMapped={false} />
-            </mesh>
-            <Text font={FONT} fontSize={0.024} color="#e2e8f0" anchorX="left" anchorY="middle"
-              position={[-0.095, 0.012, 0.001]} material-toneMapped={false}>
-              {s.name}
-            </Text>
-            <Text font={FONT} fontSize={0.014} color="#64748b" anchorX="left" anchorY="middle"
-              position={[-0.095, -0.02, 0.001]} material-toneMapped={false}>
-              {s.type}
-            </Text>
-          </group>
-        );
-      })}
-    </group>
+    <mesh>
+      <planeGeometry args={[w, h]} />
+      <meshBasicMaterial map={tex} toneMapped={false} />
+    </mesh>
   );
 }
 
@@ -129,7 +147,7 @@ export function MeetingArea() {
       <group position={[x - 0.04, 1.45, z]} rotation={[0, -Math.PI / 2, 0]}>
         <RoundedBox args={[tv.w + 0.02, tv.h + 0.02, 0.03]} radius={0.004} material={MAT.blackMetal} />
         <group position={[0, 0, 0.0155]}>
-          <TechStackSlide w={tv.w} h={tv.h} />
+          <LogoSplash w={tv.w} h={tv.h} />
         </group>
       </group>
       {/* Meeting table and chairs */}
@@ -216,18 +234,10 @@ export function AwardsShelf() {
         {achievements.map((a, i) => (
           <group key={a.title} position={[(i - (n - 1) / 2) * 0.42, shelfY[0], 0]}>
             <Trophy rare={a.rare} position={[0, 0, 0]} />
-            <Text font={FONT} fontSize={0.017} color="#f3e7d3" anchorX="center" anchorY="middle"
-              position={[0, -0.015, 0.19]} maxWidth={0.38}>
-              {a.short || a.title}
-            </Text>
           </group>
         ))}
         <Model name="potted_plant_04" position={[-0.4, shelfY[1], 0]} />
         <Model name="ceramic_vase_01" position={[0.35, shelfY[1], 0]} scale={0.55} />
-        <Text font={FONT} fontSize={0.1} letterSpacing={0.18} color="#1f2937" anchorX="center"
-          position={[0, 2.12, -0.12]}>
-          AWARDS & RECOGNITION
-        </Text>
       </group>
       <Model name="wall_clock" position={[x - 0.01, 2.45, z - 1.6]} rotation={[0, -Math.PI / 2, 0]} />
       <pointLight position={[x - 0.8, 2.2, z]} intensity={1.6} distance={2.5} color="#ffe7c4" />

@@ -65,6 +65,19 @@ export function Model({ name, ...props }) {
   return <primitive object={object} {...props} />;
 }
 
+// Paints a texture with the 2D canvas API (screens, prints). Scenery only:
+// the readable information lives in the page's text panels, not in 3D.
+export function canvasTexture(width, height, draw) {
+  const c = document.createElement("canvas");
+  c.width = width;
+  c.height = height;
+  draw(c.getContext("2d"), width, height);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
 // Crop a texture to fill a w×h surface without stretching.
 export function fitCover(tex, w, h) {
   const img = tex.image;
