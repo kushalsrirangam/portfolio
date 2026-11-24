@@ -1,5 +1,24 @@
 const projects = [
   {
+    title: "AegisOps AI (Multi-Agent Incident Response)",
+    slug: "aegisops-ai",
+    year: "2026",
+    description: "A multi-agent AI console for cloud incident investigation: RAG-cited runbooks, root-cause hypotheses, and human-approved remediation proposals.",
+    why: "Incident response usually starts with scattered alerts, logs, and runbooks. I wanted to pull those signals into one traceable workflow where agents do the investigation and a human always makes the final call.",
+    features: [
+      "Seven agent roles (triage, investigation, knowledge, supervisor, remediation, security, validation) in a LangGraph workflow with confidence-based routing",
+      "RAG runbook retrieval with pgvector cosine search, so every recommendation cites its source",
+      "Human-in-the-loop approval: the graph pauses after security review, saves a PostgreSQL checkpoint, and resumes on approve or reject",
+      "Deny-by-default security agent; agents only propose fixes and never run infrastructure commands",
+      "Optional Claude on Amazon Bedrock for root-cause analysis over read-only CloudWatch logs",
+      "React + TypeScript operations console with evidence, citations, agent traces, and audit records",
+      "Role-based sign-in, Docker Compose setup, and CI with pytest, Vitest, and a PostgreSQL integration test"
+    ],
+    tech: ["Python", "LangGraph", "FastAPI", "PostgreSQL", "pgvector", "AWS Bedrock", "React", "TypeScript", "Docker"],
+    img: "/images/aegisops.svg",
+    github: "https://github.com/kushalsrirangam/aegisops-ai",
+  },
+  {
     title: "Smart Hat (AI Navigation)",
     slug: "smart-hat",
     year: "2025",
