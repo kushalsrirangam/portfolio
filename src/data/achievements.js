@@ -1,6 +1,7 @@
 const achievements = [
   {
     title: "IEEE AIIoT 2025 — Research Paper",
+    short: "IEEE AIIoT 2025",
     date: "May 2025",
     icon: "📄",
     description: "Co-authored & presented Smart Hat project at IEEE AIIoT 2025 (Seattle).",
@@ -9,6 +10,7 @@ const achievements = [
   },
   {
     title: "Global AI Hackathon Winner (MIT RAISE)",
+    short: "MIT RAISE WINNER",
     date: "May 2025",
     icon: "🏆",
     description: "Won all-ages Global AI Hackathon for VisionCap IoT project, awarded by MIT RAISE & App Inventor Foundation.",
@@ -17,6 +19,7 @@ const achievements = [
   },
   {
     title: "AWS Academy Cloud Foundations",
+    short: "AWS CLOUD",
     date: "April 2024",
     icon: "☁️",
     description: "Completed AWS Academy Cloud Foundations certification.",

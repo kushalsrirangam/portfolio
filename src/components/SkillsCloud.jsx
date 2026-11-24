@@ -6,20 +6,20 @@ export default function SkillsCloud() {
   const [selected, setSelected] = useState(null);
 
   return (
-    <section className="py-16 bg-[#10101A]" id="skills">
+    <section className="section-3d" id="skills">
       <motion.h2
-        className="text-4xl font-bold text-center text-white mb-10"
+        className="section-title"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         Skills
       </motion.h2>
-      <div className="flex flex-wrap gap-6 justify-center items-center mb-10">
+      <div className="flex flex-wrap gap-5 justify-center items-center mb-10 max-w-5xl mx-auto">
         {skills.map((skill, i) => (
           <motion.div
             key={skill.name}
-            className={`relative bg-[#181829] px-6 py-3 rounded-2xl shadow-lg flex flex-col items-center cursor-pointer transition-all
+            className={`relative bg-[#0b0b18]/70 backdrop-blur-md border border-cyan-400/20 px-6 py-3 rounded-2xl shadow-lg flex flex-col items-center cursor-pointer transition-all
               ${selected === i ? "ring-2 ring-[#00ffe7]" : "hover:scale-110 hover:ring-2 hover:ring-[#00ffe7]"}`}
             whileHover={{ scale: 1.1 }}
             initial={{ opacity: 0, y: 40 }}

@@ -3,9 +3,9 @@ import { FaLinkedin, FaGithub, FaEnvelope } from "react-icons/fa";
 
 export default function ContactSection() {
   return (
-    <section id="contact" className="relative bg-gradient-to-br from-[#10101A] to-[#181829] w-full py-12 overflow-hidden">
+    <section id="contact" className="section-3d">
       <motion.div
-        className="max-w-2xl mx-auto bg-white/10 border border-cyan-400/30 rounded-2xl shadow-xl p-8 backdrop-blur-md text-center relative z-10"
+        className="glass max-w-2xl w-full mx-auto p-8 text-center relative z-10"
         initial={{ opacity: 0, y: 60 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -53,8 +53,6 @@ export default function ContactSection() {
         </a>
       </motion.div>
 
-      {/* Optional animated blob */}
-      <div className="absolute left-12 bottom-12 w-60 h-60 rounded-full bg-gradient-to-tr from-cyan-400/30 to-blue-800/10 blur-3xl opacity-25 animate-pulse pointer-events-none" />
     </section>
   );
 }

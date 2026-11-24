@@ -4,5 +4,59 @@
 @tailwind utilities;
 
 html, body, #root {
-  @apply bg-[#10101A] text-white min-h-screen m-0 p-0;
+  @apply bg-[#07070f] text-white min-h-screen m-0 p-0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+@layer components {
+  /* Each homepage section fills the screen so the camera has time to
+     arrive at its 3D station. */
+  .section-3d {
+    @apply relative min-h-screen w-full flex flex-col justify-center py-24 px-4;
+  }
+  /* Frosted panel that keeps text readable over the 3D scene. */
+  .glass {
+    @apply bg-[#0b0b18]/60 backdrop-blur-md border border-cyan-400/20 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.5)];
+  }
+  .section-title {
+    @apply font-display tracking-tight text-3xl md:text-5xl font-bold text-center text-white mb-10 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)];
+  }
+}
+
+/* On wide screens each section uses half the width, leaving the other half
+   for the part of the office the camera is looking at. */
+@media (min-width: 1024px) {
+  .side-left > section {
+    padding-right: 47%;
+    padding-left: 3%;
+  }
+  .side-right > section {
+    padding-left: 47%;
+    padding-right: 3%;
+  }
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+  }
+  50% {
+    text-shadow: 0 0 20px #00f0ff, 0 0 30px #00f0ff, 0 0 40px #00f0ff;
+  }
+  100% {
+    text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+  }
+}
+
+.animate-text-glow {
+  animation: glow 2s ease-in-out infinite alternate;
 }

@@ -9,6 +9,9 @@ export default {
       colors: {
         dark: "#10101A",
       },
+      fontFamily: {
+        display: ["\"Space Grotesk\"", "sans-serif"],
+      },
     },
   },
 };
