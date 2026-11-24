@@ -28,12 +28,12 @@ html {
     @apply bg-[#0b0b18]/60 backdrop-blur-md border border-cyan-400/20 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.5)];
   }
   .section-title {
-    @apply font-display uppercase tracking-wider text-3xl md:text-4xl font-bold text-center text-white mb-10 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)];
+    @apply font-display tracking-tight text-3xl md:text-5xl font-bold text-center text-white mb-10 drop-shadow-[0_2px_16px_rgba(0,0,0,0.9)];
   }
 }
 
 /* On wide screens each section uses half the width, leaving the other half
-   for the part of the room the camera is looking at. */
+   for the part of the office the camera is looking at. */
 @media (min-width: 1024px) {
   .side-left > section {
     padding-right: 47%;

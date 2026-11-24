@@ -10,7 +10,7 @@ export default {
         dark: "#10101A",
       },
       fontFamily: {
-        display: ["Orbitron", "sans-serif"],
+        display: ["\"Space Grotesk\"", "sans-serif"],
       },
     },
   },

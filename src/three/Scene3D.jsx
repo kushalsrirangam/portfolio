@@ -1,25 +1,30 @@
 import { Component, Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
+import { EffectComposer, Bloom, N8AO, Vignette } from "@react-three/postprocessing";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import Room from "./room/Room";
-import Setup from "./room/Setup";
-import { LevelWall, TrophyShelf, Arcade } from "./room/Props";
+import Office from "./office/Office";
+import Workstation from "./office/Workstation";
+import { JourneyWall, MeetingArea, AwardsShelf } from "./office/Areas";
+import { MODELS } from "./office/shared";
 import { scrollStore, startTracking } from "./scrollStore";
 
-const BG = "#05050c";
+const BG = "#0b0d12";
+
+// Start fetching the furniture as soon as this file loads.
+MODELS.forEach((m) => useGLTF.preload(`/models/${m}.glb`));
 
 // One camera shot per page section, in page order.
 // `frame` slides the shot sideways on wide screens so the subject sits beside
 // the section's text panel: +1 = subject on the right, -1 = on the left.
 const SHOTS = [
-  { pos: [3.3, 2.25, 2.1], target: [-0.1, 1.15, -2.7], frame: 0.5 }, // hero: the whole setup
-  { pos: [-0.55, 1.7, -1.5], target: [-1.15, 1.25, -3.05], frame: -0.9 }, // about: profile screen
-  { pos: [-1.3, 2.45, -1.0], target: [-6.47, 2.4, -1.0], frame: -0.85 }, // timeline: level wall
-  { pos: [0.8, 1.7, -1.3], target: [0, 1.3, -3.25], frame: 0.9 }, // projects: main monitor
-  { pos: [4.2, 1.7, -1.65], target: [5.17, 1.45, -3.06], frame: 0.9 }, // skills: arcade
-  { pos: [3.4, 2.25, 0.5], target: [6.25, 2.15, 0.5], frame: 0.9 }, // achievements: trophies
-  { pos: [-1.6, 3.1, 6.4], target: [1.4, 2.2, -3.6], frame: 0.95 }, // contact: pull back
+  { pos: [3.4, 1.75, 2.6], target: [-0.4, 1.05, -3.0], frame: 0.5 }, // hero: the office and the desk
+  { pos: [0.2, 1.32, -2.2], target: [-0.62, 1.1, -3.42], frame: -0.9 }, // about: profile on the side screen
+  { pos: [-2.6, 1.6, -1.0], target: [-6, 1.6, -1.0], frame: -0.85 }, // timeline: journey wall
+  { pos: [0.5, 1.3, -2.55], target: [0.12, 1.1, -3.5], frame: 0.9 }, // projects: main monitor
+  { pos: [2.3, 1.55, -2.2], target: [6, 1.4, -2.2], frame: 0.9 }, // skills: meeting room TV
+  { pos: [3.0, 1.5, 1.0], target: [6, 1.3, 1.0], frame: 0.9 }, // achievements: awards shelf
+  { pos: [1.4, 1.75, 5.6], target: [-4.0, 0.8, 2.4], frame: -0.85 }, // contact: the whole office
 ];
 const LAST = SHOTS.length - 1;
 
@@ -94,24 +99,24 @@ export default function Scene3D() {
       <SceneBoundary>
         <Canvas
           dpr={[1, mobile ? 1.25 : 1.75]}
-          camera={{ fov: 50, near: 0.05, far: 60, position: SHOTS[0].pos }}
-          gl={{ antialias: !mobile, powerPreference: "high-performance" }}
+          camera={{ fov: 45, near: 0.03, far: 200, position: SHOTS[0].pos }}
+          gl={{ antialias: !mobile, powerPreference: "high-performance", toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
         >
-          <color attach="background" args={[BG]} />
-          <fog attach="fog" args={[BG, 9, 24]} />
           <Suspense fallback={null}>
-            <Room />
-            <Setup />
-            <LevelWall />
-            <TrophyShelf />
-            <Arcade />
+            <Office />
+            <Workstation />
+            <JourneyWall />
+            <MeetingArea />
+            <AwardsShelf />
           </Suspense>
           <CameraRig />
-          {/* Neon glow. Skipped on phones to keep them smooth. */}
+          {/* Ambient occlusion (soft contact darkening) and a gentle glow on
+              light sources. Skipped on phones to keep them smooth. */}
           {!mobile && (
             <EffectComposer multisampling={0}>
-              <Bloom mipmapBlur intensity={0.85} luminanceThreshold={0.6} luminanceSmoothing={0.25} />
-              <Vignette offset={0.3} darkness={0.6} />
+              <N8AO aoRadius={0.6} intensity={2.2} distanceFalloff={0.6} halfRes />
+              <Bloom mipmapBlur intensity={0.35} luminanceThreshold={1.0} luminanceSmoothing={0.2} />
+              <Vignette offset={0.35} darkness={0.45} />
             </EffectComposer>
           )}
         </Canvas>
