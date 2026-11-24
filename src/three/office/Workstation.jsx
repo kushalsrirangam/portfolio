@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { RoundedBox, Text, useTexture } from "@react-three/drei";
+import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
-import projects from "../../data/projects";
-import { FONT, ACCENT, MAT, Model, fitCover } from "./shared";
+import { MAT, Model, canvasTexture } from "./shared";
 
 // Desk in front of the walnut feature wall, facing the room's back.
 const DESK = { x: 0, z: -3.3, w: 1.8, d: 0.8, h: 0.75 };
@@ -55,80 +53,139 @@ function Monitor({ pos, rotY, w, h, children }) {
   );
 }
 
-// Main screen: cycles through the project screenshots.
-function ProjectScreen({ w, h }) {
-  const textures = useTexture(projects.map((p) => p.img || "/images/aegisops.svg"));
-  const mat = useMemo(() => new THREE.MeshBasicMaterial({ toneMapped: false, color: "#d9d9d9" }), []);
-  const label = useRef();
-  const shown = useRef(-1);
-  useEffect(() => {
-    textures.forEach((t) => {
-      t.colorSpace = THREE.SRGBColorSpace;
-      t.anisotropy = 8;
-      fitCover(t, w, h);
-    });
-  }, [textures, w, h]);
-  useFrame(({ clock }) => {
-    const i = Math.floor(clock.elapsedTime / 4) % textures.length;
-    if (i === shown.current) return;
-    shown.current = i;
-    mat.map = textures[i];
-    mat.needsUpdate = true;
-    if (label.current) label.current.text = projects[i].title.split(" (")[0];
-  });
+// Main screen: an analytics dashboard (scenery, no portfolio text).
+function DashboardScreen({ w, h }) {
+  const tex = useMemo(
+    () =>
+      canvasTexture(1400, 800, (g, W, H) => {
+        g.fillStyle = "#0b1020";
+        g.fillRect(0, 0, W, H);
+        // Sidebar and top bar
+        g.fillStyle = "#111831";
+        g.fillRect(0, 0, 70, H);
+        g.fillRect(70, 0, W - 70, 56);
+        for (let i = 0; i < 6; i++) {
+          g.fillStyle = i === 1 ? "#22d3ee" : "#2a3352";
+          g.fillRect(22, 90 + i * 60, 26, 26);
+        }
+        // KPI cards with sparklines
+        const kpi = ["#22d3ee", "#a78bfa", "#34d399", "#f59e0b"];
+        kpi.forEach((c, i) => {
+          const x = 100 + i * 322;
+          g.fillStyle = "#141c36";
+          g.fillRect(x, 80, 300, 130);
+          g.fillStyle = "#3b4566";
+          g.fillRect(x + 20, 100, 120, 12);
+          g.fillStyle = "#e2e8f0";
+          g.fillRect(x + 20, 125, 90 + i * 15, 30);
+          g.strokeStyle = c;
+          g.lineWidth = 4;
+          g.beginPath();
+          for (let k = 0; k <= 12; k++) {
+            const px = x + 160 + k * 10;
+            const py = 180 - Math.abs(Math.sin(k * 0.9 + i)) * 40 - k * 2;
+            k ? g.lineTo(px, py) : g.moveTo(px, py);
+          }
+          g.stroke();
+        });
+        // Area chart
+        g.fillStyle = "#141c36";
+        g.fillRect(100, 235, 820, 520);
+        const grad = g.createLinearGradient(0, 300, 0, 740);
+        grad.addColorStop(0, "rgba(34,211,238,0.55)");
+        grad.addColorStop(1, "rgba(34,211,238,0.02)");
+        g.fillStyle = grad;
+        g.beginPath();
+        g.moveTo(130, 730);
+        for (let k = 0; k <= 40; k++) {
+          const px = 130 + k * 19;
+          const py = 600 - k * 6 - Math.sin(k * 0.6) * 45 - Math.sin(k * 0.17) * 30;
+          g.lineTo(px, py);
+        }
+        g.lineTo(890, 730);
+        g.fill();
+        g.strokeStyle = "#1e2a4a";
+        g.lineWidth = 1;
+        for (let k = 0; k < 6; k++) {
+          g.beginPath();
+          g.moveTo(130, 300 + k * 86);
+          g.lineTo(890, 300 + k * 86);
+          g.stroke();
+        }
+        // Bar chart
+        g.fillStyle = "#141c36";
+        g.fillRect(940, 235, 360, 520);
+        for (let k = 0; k < 8; k++) {
+          const bh = 80 + ((k * 53) % 300);
+          g.fillStyle = k % 2 ? "#a78bfa" : "#6366f1";
+          g.fillRect(965 + k * 41, 730 - bh, 26, bh);
+        }
+      }),
+    []
+  );
   return (
-    <group>
-      <mesh material={mat}>
-        <planeGeometry args={[w, h]} />
-      </mesh>
-      <mesh position={[0, -h / 2 + 0.018, 0.0005]}>
-        <planeGeometry args={[w, 0.036]} />
-        <meshBasicMaterial color="#0b0f17" transparent opacity={0.8} toneMapped={false} />
-      </mesh>
-      <Text ref={label} font={FONT} fontSize={0.017} color="#e2e8f0" anchorX="left" anchorY="middle"
-        position={[-w / 2 + 0.02, -h / 2 + 0.018, 0.001]} material-toneMapped={false}>
-        {" "}
-      </Text>
-    </group>
+    <mesh>
+      <planeGeometry args={[w, h]} />
+      <meshBasicMaterial map={tex} toneMapped={false} />
+    </mesh>
   );
 }
 
-// Side screen: a clean professional profile card.
-function ProfileScreen({ w, h }) {
-  const photo = useTexture("/images/my.JPG");
-  useEffect(() => {
-    photo.colorSpace = THREE.SRGBColorSpace;
-    fitCover(photo, 0.13, 0.13);
-  }, [photo]);
-  const line = (text, y, size, color) => (
-    <Text font={FONT} fontSize={size} color={color} anchorX="left" anchorY="middle"
-      position={[-0.07, y, 0.001]} maxWidth={0.34} material-toneMapped={false}>
-      {text}
-    </Text>
+// Side screen: a code editor (scenery, no portfolio text).
+function CodeScreen({ w, h }) {
+  const tex = useMemo(
+    () =>
+      canvasTexture(1200, 680, (g, W, H) => {
+        g.fillStyle = "#1e1e2e";
+        g.fillRect(0, 0, W, H);
+        g.fillStyle = "#181825";
+        g.fillRect(0, 0, 220, H);
+        g.fillRect(220, 0, W - 220, 40);
+        g.fillStyle = "#313244";
+        g.fillRect(220, 0, 180, 40);
+        for (let i = 0; i < 14; i++) {
+          g.fillStyle = i === 3 ? "#45475a" : "#2a2b3d";
+          g.fillRect(20 + (i % 3 ? 16 : 0), 60 + i * 30, 120 + ((i * 37) % 60), 12);
+        }
+        g.font = "20px Consolas, 'Courier New', monospace";
+        const lines = [
+          [["#cba6f7", "from "], ["#cdd6f4", "langgraph.graph "], ["#cba6f7", "import "], ["#cdd6f4", "StateGraph"]],
+          [["#cba6f7", "from "], ["#cdd6f4", "fastapi "], ["#cba6f7", "import "], ["#cdd6f4", "FastAPI"]],
+          [],
+          [["#cdd6f4", "app = "], ["#89b4fa", "FastAPI"], ["#cdd6f4", "()"]],
+          [["#cdd6f4", "graph = "], ["#89b4fa", "StateGraph"], ["#cdd6f4", "(IncidentState)"]],
+          [],
+          [["#cba6f7", "def "], ["#89b4fa", "triage"], ["#cdd6f4", "(state):"]],
+          [["#6c7086", "    # classify severity and route"]],
+          [["#cdd6f4", "    score = model."], ["#89b4fa", "predict"], ["#cdd6f4", "(state.logs)"]],
+          [["#cba6f7", "    return "], ["#cdd6f4", "{"], ["#a6e3a1", "\"severity\""], ["#cdd6f4", ": score}"]],
+          [],
+          [["#cdd6f4", "graph."], ["#89b4fa", "add_node"], ["#cdd6f4", "("], ["#a6e3a1", "\"triage\""], ["#cdd6f4", ", triage)"]],
+          [["#cdd6f4", "graph."], ["#89b4fa", "add_edge"], ["#cdd6f4", "("], ["#a6e3a1", "\"triage\""], ["#cdd6f4", ", "], ["#a6e3a1", "\"investigate\""], ["#cdd6f4", ")"]],
+          [],
+          [["#f9e2af", "@app.post"], ["#cdd6f4", "("], ["#a6e3a1", "\"/incidents\""], ["#cdd6f4", ")"]],
+          [["#cba6f7", "async def "], ["#89b4fa", "create"], ["#cdd6f4", "(body: Incident):"]],
+          [["#cba6f7", "    return await "], ["#cdd6f4", "graph."], ["#89b4fa", "ainvoke"], ["#cdd6f4", "(body)"]],
+        ];
+        lines.forEach((parts, i) => {
+          const y = 80 + i * 32;
+          g.fillStyle = "#585b70";
+          g.fillText(String(i + 1).padStart(2, " "), 240, y);
+          let x = 290;
+          parts.forEach(([c, t]) => {
+            g.fillStyle = c;
+            g.fillText(t, x, y);
+            x += g.measureText(t).width;
+          });
+        });
+      }),
+    []
   );
   return (
-    <group>
-      <mesh>
-        <planeGeometry args={[w, h]} />
-        <meshBasicMaterial color="#e9edf2" toneMapped={false} />
-      </mesh>
-      <mesh position={[0, h / 2 - 0.035, 0.0005]}>
-        <planeGeometry args={[w, 0.07]} />
-        <meshBasicMaterial color="#0f172a" toneMapped={false} />
-      </mesh>
-      <mesh position={[-0.19, 0.035, 0.001]}>
-        <circleGeometry args={[0.068, 48]} />
-        <meshBasicMaterial map={photo} toneMapped={false} />
-      </mesh>
-      {line("Kushal Sri Rangam", 0.075, 0.026, "#0f172a")}
-      {line("AI & Data Engineer", 0.04, 0.016, "#0e7490")}
-      {line("M.S. Computer Science · University of the Pacific", 0.008, 0.011, "#475569")}
-      {line("● Open to opportunities", -0.03, 0.013, "#15803d")}
-      <Text font={FONT} fontSize={0.012} color="#334155" anchorX="left" anchorY="top"
-        position={[-0.27, -0.075, 0.001]} maxWidth={0.54} lineHeight={1.4} material-toneMapped={false}>
-        {"Multi-agent AI · RAG · Computer vision · IoT · Cloud\nIEEE AIIoT 2025 author · MIT RAISE hackathon winner"}
-      </Text>
-    </group>
+    <mesh>
+      <planeGeometry args={[w, h]} />
+      <meshBasicMaterial map={tex} toneMapped={false} />
+    </mesh>
   );
 }
 
@@ -184,10 +241,10 @@ export default function Workstation() {
     <group>
       <Desk />
       <Monitor {...MAIN_SCREEN}>
-        <ProjectScreen w={MAIN_SCREEN.w} h={MAIN_SCREEN.h} />
+        <DashboardScreen w={MAIN_SCREEN.w} h={MAIN_SCREEN.h} />
       </Monitor>
       <Monitor {...SIDE_SCREEN}>
-        <ProfileScreen w={SIDE_SCREEN.w} h={SIDE_SCREEN.h} />
+        <CodeScreen w={SIDE_SCREEN.w} h={SIDE_SCREEN.h} />
       </Monitor>
       <Model name="classic_laptop" position={[0.66, DESK.h, -3.3]} rotation={[0, -0.45, 0]} scale={0.55} />
       <Model name="office_notepads" position={[0.62, DESK.h, -2.98]} rotation={[0, 0.25, 0]} scale={0.25} />
