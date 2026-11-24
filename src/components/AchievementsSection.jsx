@@ -6,9 +6,9 @@ export default function AchievementsSection() {
   const [open, setOpen] = useState(null);
 
   return (
-    <section className="py-16 pb-32 bg-[#10101A]" id="achievements">
+    <section className="section-3d pb-32" id="achievements">
       <motion.h2
-        className="text-4xl font-bold text-center text-white mb-10"
+        className="section-title"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -19,7 +19,7 @@ export default function AchievementsSection() {
         {achievements.map((ach, i) => (
           <motion.div
             key={ach.title}
-            className="relative bg-[#181829] border-2 border-yellow-400 shadow-yellow-400/40 
+            className="relative bg-[#0b0b18]/70 backdrop-blur-md border-2 border-yellow-400 shadow-yellow-400/40 
               rounded-2xl shadow-lg flex flex-col items-center px-7 py-6 cursor-pointer transition-all hover:shadow-2xl"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}

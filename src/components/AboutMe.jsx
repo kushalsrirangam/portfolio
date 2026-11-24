@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 
 export default function AboutMe() {
   return (
-    <section className="relative py-16 bg-[#10101A] flex flex-col items-center text-center" id="about">
+    <section className="section-3d items-center text-center" id="about">
+      <div className="glass max-w-2xl w-full mx-auto p-8 flex flex-col items-center">
       <motion.img
         src="/images/my.JPG"
         alt="Kushal Sri Rangam"
@@ -49,6 +50,7 @@ export default function AboutMe() {
         >
           💡 Hackathon Winner @ MIT RAISE
         </motion.div>
+      </div>
       </div>
     </section>
   );

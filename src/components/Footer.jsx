@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="bg-[#10101A] text-center py-5 border-t border-white/10 text-gray-400">
+    <footer className="relative bg-[#07070f]/80 backdrop-blur-md text-center py-5 border-t border-white/10 text-gray-400">
       <div className="flex justify-center gap-4 mb-2">
         <a href="https://www.linkedin.com/in/kushal-sri-rangam-a1857b2a0/" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-300 transition">LinkedIn</a>
         <span>•</span>
